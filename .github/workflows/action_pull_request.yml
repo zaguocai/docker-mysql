@@ -31,7 +31,7 @@ jobs:
   # (2/2) Build
   docker:
     needs: [params]
-    uses: zaguocai/github-actions/.github/workflows/docker-name-version-arch.yml@main
+    uses: lapzeon/github-actions/.github/workflows/docker-name-version-arch.yml@main
     with:
       enabled: true
       can_deploy: false

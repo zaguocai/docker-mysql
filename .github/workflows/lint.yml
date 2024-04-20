@@ -19,4 +19,4 @@ on:
 # -------------------------------------------------------------------------------------------------
 jobs:
   lint:
-    uses: zaguocai/github-actions/.github/workflows/lint-generic.yml@main
+    uses: lapzeon/github-actions/.github/workflows/lint-generic.yml@main
