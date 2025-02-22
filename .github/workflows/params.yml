@@ -39,12 +39,12 @@ env:
     [
       {
         "NAME":    "mysql",
-        "VERSION": ["8.3"],
+        "VERSION": ["8.4"],
         "ARCH":    ["linux/amd64", "linux/arm64"]
       },
       {
         "NAME":    "mariadb",
-        "VERSION": ["10.11"],
+        "VERSION": ["11.4"],
         "ARCH":    ["linux/amd64", "linux/arm64"]
       },
       {
