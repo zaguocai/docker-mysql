@@ -15,9 +15,9 @@ RUN set -eux \
 	\
 # Allow native password handling for MySQL 8.0
 	&& if [ -f /etc/my.cnf ]; then \
-		sed -i'' 's/^\[mysqld\]/[mysqld]\ndefault-authentication-plugin=mysql_native_password/g' /etc/my.cnf; \
+		sed -i'' 's/^\[mysqld\]/[mysqld]\ndefault_authentication_plugin=mysql_native_password/g' /etc/my.cnf; \
 	elif [ -f /etc/mysql/my.cnf ]; then \
-		sed -i'' 's/^\[mysqld\]/[mysqld]\ndefault-authentication-plugin=mysql_native_password/g' /etc/mysql/my.cnf; \
+		sed -i'' 's/^\[mysqld\]/[mysqld]\ndefault_authentication_plugin=mysql_native_password/g' /etc/mysql/my.cnf; \
 	else \
 		echo "/etc/my.cnf and /etc/mysql/my.cnf are not available"; \
 		false; \
