@@ -3,7 +3,7 @@ set -e
 set -u
 set -o pipefail
 
-# IMAGE="zaguocai/mysql"
+IMAGE="zaguocai/mysql"
 IMAGE="zaguocai/mysql"
 #NAME="${1}"
 #VERSION="${2}"
