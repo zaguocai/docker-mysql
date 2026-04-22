@@ -1,0 +1,90 @@
+name: Build and Push Multi-Arch Docker Image
+
+on:
+  push:
+    branches: [ "main" ]
+  schedule:
+    - cron: '0 18 * * 1,3,5'
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: "zaguocai/mysql"
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          # MySQL
+          - { name: mysql, version: "5.5", arches: ["linux/amd64"] }
+          - { name: mysql, version: "5.6", arches: ["linux/amd64"] }
+          - { name: mysql, version: "5.7", arches: ["linux/amd64"] }
+          - { name: mysql, version: "8.0", arches: ["linux/amd64", "linux/arm64"] }
+          - { name: mysql, version: "8.4", arches: ["linux/amd64", "linux/arm64"] }
+          
+          # MariaDB
+          - { name: mariadb, version: "5.5", arches: ["linux/amd64"] }
+          - { name: mariadb, version: "10.0", arches: ["linux/amd64", "linux/arm64"] }
+          - { name: mariadb, version: "10.1", arches: ["linux/amd64", "linux/arm64"] }
+          - { name: mariadb, version: "10.2", arches: ["linux/amd64", "linux/arm64"] }
+          - { name: mariadb, version: "10.3", arches: ["linux/amd64", "linux/arm64"] }
+          - { name: mariadb, version: "10.4", arches: ["linux/amd64", "linux/arm64"] }
+          - { name: mariadb, version: "10.5", arches: ["linux/amd64", "linux/arm64"] }
+          - { name: mariadb, version: "10.6", arches: ["linux/amd64", "linux/arm64"] }
+          - { name: mariadb, version: "10.7", arches: ["linux/amd64", "linux/arm64"] }
+          - { name: mariadb, version: "10.8", arches: ["linux/amd64", "linux/arm64"] }
+          - { name: mariadb, version: "10.9", arches: ["linux/amd64", "linux/arm64"] }
+          - { name: mariadb, version: "10.10", arches: ["linux/amd64", "linux/arm64"] }
+          - { name: mariadb, version: "10.11", arches: ["linux/amd64", "linux/arm64"] }
+          - { name: mariadb, version: "11.4", arches: ["linux/amd64", "linux/arm64"] }
+          - { name: mariadb, version: "11.8", arches: ["linux/amd64", "linux/arm64"] }
+          - { name: mariadb, version: "12.1", arches: ["linux/amd64", "linux/arm64"] }
+          - { name: mariadb, version: "12.2", arches: ["linux/amd64", "linux/arm64"] }
+          
+          # Percona
+          - { name: percona, version: "5.5", arches: ["linux/amd64"] }
+          - { name: percona, version: "5.6", arches: ["linux/amd64"] }
+          - { name: percona, version: "5.7", arches: ["linux/amd64"] }
+          - { name: percona, version: "8.0", arches: ["linux/amd64", "linux/arm64"] }
+          - { name: percona, version: "8.4", arches: ["linux/amd64", "linux/arm64"] }
+      fail-fast: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Check if current version is the latest
+        id: check-latest
+        run: |
+          if [[ "${{ matrix.name }}" == "mariadb" && "${{ matrix.version }}" == "12.2" ]]; then
+            echo "tags=${{ env.IMAGE_NAME }}:${{ matrix.name }}-${{ matrix.version }},${{ env.IMAGE_NAME }}:latest" >> $GITHUB_OUTPUT
+          else
+            echo "tags=${{ env.IMAGE_NAME }}:${{ matrix.name }}-${{ matrix.version }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+        with:
+          driver-opts: |
+            network=host
+
+      - name: Build and push multi-arch image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Dockerfiles/${{ matrix.name }}-${{ matrix.version }}
+          platforms: ${{ join(matrix.arches, ',') }}
+          push: true
+          build-args: |
+            mysql_VERSION=${{ matrix.name }}-${{ matrix.version }}
+          tags: |
+            ${{ steps.check-latest.outputs.tags }}

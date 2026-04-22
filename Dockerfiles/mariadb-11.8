@@ -1,8 +1,10 @@
 # vi: ft=dockerfile
-FROM percona/percona-server:8.0
+FROM mariadb:11.8
 
-USER root
 RUN set -eux \
+	&& ln -s /usr/bin/mariadb /usr/bin/mysql \
+	&& echo 'alias mysql="mariadb"' >> /root/.bashrc \
+	&& echo 'alias mysqldump="mariadb-dump"' >> /root/.bashrc \
 	&& mkdir -p /etc/mysql/docker-default.d/ \
 	&& if [ -f /etc/my.cnf ]; then \
 		echo '!'"includedir /etc/mysql/docker-default.d/" >> /etc/my.cnf; \
@@ -12,8 +14,6 @@ RUN set -eux \
 		echo "/etc/my.cnf and /etc/mysql/my.cnf are not available"; \
 		false; \
 	fi \
-# Allow native password handling for MySQL 8.0
-	&& sed -i'' "s|^pid-file=.*$|pid-file=/var/run/mysqld/mysqld.pid\ndefault-authentication-plugin=mysql_native_password|g" /etc/my.cnf \
 	&& if [ -f "/entrypoint.sh" ]; then \
 		mv "/entrypoint.sh" "/docker-entrypoint.sh"; \
 	fi \
@@ -23,4 +23,4 @@ RUN set -eux \
 	&& chmod +x "/docker-entrypoint.sh"
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
-CMD ["mysqld"]
+CMD ["mariadbd"]
